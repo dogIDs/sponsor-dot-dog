@@ -18,7 +18,8 @@
 var count = "25";
 var callback = "&callback=?";
 var urlStart = "http://api.petfinder.com/shelter.getPets?format=json&key=<%= Application.get_env(:sponsor_dot_dog, :petfinder_key) %>&id=<%= @shelter_id %>&count=";
-function loadPets(newOffset = 0) {
+function loadPets(newOffset) {
+  var newOffset = (typeof newOffset === 'undefined') ? 0 : newOffset;
   var offset = "&offset=" + newOffset;
   var url = urlStart + count + offset + callback;
   $("table tr").not("table thead tr").remove();
