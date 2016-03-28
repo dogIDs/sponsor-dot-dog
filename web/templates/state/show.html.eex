@@ -1,0 +1,78 @@
+<div class="col-lg-12">
+  <%= link "Back to Home", to: page_path(@conn, :index) %>
+  <h4 class="text-center"> You are looking at rescues from <%= @state.state_name %> </h4>
+</div>
+
+<ul>
+  <%= for pet_rescue <- @pet_rescues do %>
+  <li>
+    <%= pet_rescue.rescue_name %>
+  </li>
+  <%= end %>
+</ul>
+
+<div class="nav">
+  <ul class="pager">
+  </ul>
+</div>
+
+</ul>
+<table class="table table-striped col-lg-12">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Address</th>
+      <th>City</th>
+    </tr>
+  </thead>
+</table>
+<%= link "Back to Home", to: page_path(@conn, :index) %>
+
+<script type="text/javascript">
+var count = "100";
+var callback = "&callback=?";
+var urlStart = "http://api.petfinder.com/shelter.find?format=json&key=<%= Application.get_env(:sponsor_dot_dog, :petfinder_key) %>&location=<%= @state.state_abbreviation %>&count=";
+
+function loadShelters(newOffset = 0) {
+  var offset = "&offset=" + newOffset;
+  var url = urlStart + count + offset + callback;
+  $.ajax(url, {
+    dataType: 'jsonp',
+    success: function(data) {
+      $("table tr").not("table thead tr").remove();
+      $(".pager li").remove();
+      console.log(data);
+      if (Number(data.petfinder.lastOffset.$t) == Number(count) && (Number(data.petfinder.lastOffset.$t) % Number(count)) == 0) {
+        $(".pager").append("<li><a onclick='loadShelters(" + data.petfinder.lastOffset.$t + ")'>Next " + count + "</a></li>");
+      } else if (Number(data.petfinder.lastOffset.$t) > Number(count) && (Number(data.petfinder.lastOffset.$t) % Number(count)) == 0) {
+        $(".pager").append("<li><a onclick='loadShelters(" + (newOffset - count) + ");'>Prev " + count + "</a></li>");
+        $(".pager").append("<li><a onclick='loadShelters(" + data.petfinder.lastOffset.$t + ");'>Next " + count + "</a></li>");
+      } else if (Number(data.petfinder.lastOffset.$t) > Number(count)) {
+        offsetRemainder = data.petfinder.lastOffset.$t % count;
+        prevOffset = data.petfinder.lastOffset.$t - offsetRemainder - count;
+        $(".pager").append("<li><a onclick='loadShelters(" + prevOffset + ")'>Prev</a></li>");
+      }
+      shelter_list = data.petfinder.shelters.shelter;
+      for (i = 0; i < shelter_list.length; i++) {
+        var name = shelter_list[i].name.$t         == null ? '' : shelter_list[i].name.$t;
+        var address1 = shelter_list[i].address1.$t == null ? '' : shelter_list[i].address1.$t;
+        var address2 = shelter_list[i].address2.$t == null ? '' : shelter_list[i].address2.$t;
+        var city = shelter_list[i].city.$t         == null ? '' : shelter_list[i].city.$t;
+        var state = shelter_list[i].state.$t       == null ? '' : shelter_list[i].state.$t;
+        var zip = shelter_list[i].zip.$t           == null ? '' : shelter_list[i].zip.$t;
+        var phone = shelter_list[i].phone.$t       == null ? '' : shelter_list[i].phone.$t;
+        var email = shelter_list[i].email.$t       ==  null? '' : shelter_list[i].email.$t;
+        tr = $('<tr/>');
+        tr.append("<td>" + name + "</td>");
+        tr.append("<td>" + address1 + '<br/>' + address2 + "</td>");
+        tr.append("<td>" + city + '<br/>' + state + ' ' + zip + "</td>");
+        tr.append("<td>" + '<a class="btn btn-primary" href="' + window.location.origin + '/pet_rescues/?shelter=' + shelter_list[i].id.$t + '">See animals</a>' + "</td>");
+        $('table').append(tr);
+      }
+    }
+  });
+}
+window.onload = function() {
+  loadShelters();
+}
+</script>

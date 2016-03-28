@@ -1,0 +1,67 @@
+<h2>Show dog</h2>
+
+<ul>
+
+  <li>
+    <strong>Pet:</strong>
+    <%= @dog.pet_id %>
+  </li>
+
+  <li>
+    <strong>Rescue:</strong>
+    <%= @dog.rescue_id %>
+  </li>
+
+  <li>
+    <strong>Name:</strong>
+    <%= @dog.name %>
+  </li>
+
+  <li>
+    <strong>Animal:</strong>
+    <%= @dog.animal %>
+  </li>
+
+  <li>
+    <strong>Mix:</strong>
+    <%= @dog.mix %>
+  </li>
+
+  <li>
+    <strong>Age:</strong>
+    <%= @dog.age %>
+  </li>
+
+  <li>
+    <strong>Sex:</strong>
+    <%= @dog.sex %>
+  </li>
+
+  <li>
+    <strong>Options:</strong>
+    <%= @dog.options %>
+  </li>
+
+  <li>
+    <strong>Description:</strong>
+    <%= @dog.description %>
+  </li>
+
+  <li>
+    <strong>Last update:</strong>
+    <%= @dog.last_update %>
+  </li>
+
+  <li>
+    <strong>Photo 1:</strong>
+    <%= @dog.photo_1 %>
+  </li>
+
+  <li>
+    <strong>Photo 2:</strong>
+    <%= @dog.photo_2 %>
+  </li>
+
+</ul>
+
+<%= link "Back to Pet Rescue", to: pet_rescue_path(@conn, :show, @dog.rescue_id) %>

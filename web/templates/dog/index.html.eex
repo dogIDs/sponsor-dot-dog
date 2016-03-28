@@ -1,0 +1,90 @@
+<style>
+.carousel-container {
+  background-color: #dfdfdf;
+  border-radius: 10px;
+  padding: 1em 0;
+}
+</style>
+<div class="container-fluid">
+  <div class="col-xs-12">
+    <button class="btn btn-primary" onclick="window.history.back()">Back to State</button>
+    <center><h2></h2></center>
+    <div class="col-lg-12 carousel-container">
+      <div class="col-lg-6 col-lg-offset-3">
+        <div class="carousel">
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <table class="table table-rounded table1">
+        <thead>
+          <th>Details:</th>
+          <th>&nbsp;</th>
+        </thead>
+      </table>
+    </div>
+    <div class="col-lg-6">
+      <table class="table table-rounded table2">
+      </table>
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+window.onload = function() {
+  var url = "http://api.petfinder.com/pet.get?format=json&key=<%= Application.get_env(:sponsor_dot_dog, :petfinder_key) %>&count=50&id=<%= @dog_id %>&callback=?";
+
+  $.ajax(url, {
+    dataType: 'jsonp',
+    success: function(data) {
+      console.log(data);
+      var pet = data.petfinder.pet;
+      $("h2").append(pet.name.$t);
+      for (i = 0; i < pet.media.photos.photo.length; i++) {
+        var imageArray = $.map(pet.media.photos.photo[i], function(value, index) {
+          return [value];
+        });
+        if (imageArray[0] == "pn") {
+          var img = "<img src='" + imageArray[1] + "' />" ;
+          $(".carousel").append(img);
+        }
+      }
+      if ($.isEmptyObject(pet.age) == false) {
+        $(".table1").append("<tr><td>Age:</td><td>"+ pet.age.$t + "</td></tr>");
+      }
+      if (pet.breeds.breed.length == null) {
+        $(".table1").append("<tr><td>Breed:</td><td>" + pet.breeds.breed.$t + "</td></tr>");
+      } else {
+        var breeds = "";
+        $.each(pet.breeds.breed, function(t, val) {
+          breeds += val.$t + "<br/>";
+        });
+        $(".table1").append("<tr><td>Breeds:</td><td>" + breeds + "</td></tr>");
+      }
+      if ($.isEmptyObject(pet.options) == false){
+        if (pet.options.option.length == null) {
+          $(".table1").append("<tr><td>Options:</td><td>" + pet.options.option.$t + "</td></tr>");
+        } else {
+          var options = "";
+          for (t = 0; t < pet.options.option.length; t++) {
+            if (pet.options.option[t].$t != "altered") {
+              options += pet.options.option[t].$t + "<br/>";
+            }
+          }
+          $(".table1").append("<tr><td>Options:</td><td>" + options + "</td></tr>");
+        }
+      }
+      if ($.isEmptyObject(pet.description) == false) {
+        $(".table2").append("<thead><th>Age:</th></thead><tbody><td>" + pet.description.$t.replace(/\n/g,"<br>") + "</td></tbody>");
+      }
+      $(".carousel").slick({
+        lazyLoad: 'progressive',
+        dots: true,
+        speed: 300,
+        slidesToShow: 1,
+        adaptiveHeight: true
+      });
+    }
+  });
+
+};
+</script>

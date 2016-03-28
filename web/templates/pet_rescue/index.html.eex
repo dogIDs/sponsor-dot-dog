@@ -1,0 +1,93 @@
+<button class="btn btn-primary" onclick="window.history.back()">Back to State</button>
+<div class="nav">
+  <ul class="pager">
+  </ul>
+</div>
+<table class="table table-hover table-rounded">
+  <thead class="titles">
+    <th><center>Main Image</center></th>
+    <th>Name</th>
+    <th>Age</th>
+    <th>Gender</th>
+    <th>Breeds</th>
+    <th>Notes</th>
+  </thead>
+</table>
+<button class="btn btn-primary" onclick="window.history.back()">Back to State</button>
+<script type=text/javascript>
+var count = "25";
+var callback = "&callback=?";
+var urlStart = "http://api.petfinder.com/shelter.getPets?format=json&key=<%= Application.get_env(:sponsor_dot_dog, :petfinder_key) %>&id=<%= @shelter_id %>&count=";
+function loadPets(newOffset = 0) {
+  var offset = "&offset=" + newOffset;
+  var url = urlStart + count + offset + callback;
+  $("table tr").not("table thead tr").remove();
+  $(".pager li").remove();
+  $.ajax(url, {
+    dataType: 'jsonp',
+    success: function(data) {
+      console.log(data);
+      if (data.petfinder.lastOffset.$t == count && (data.petfinder.lastOffset.$t % count) == 0) {
+        $(".pager").append("<li><a onclick='loadPets(" + count + ")'>Next " + count + "</a></li>");
+      } else if (data.petfinder.lastOffset.$t > count && (data.petfinder.lastOffset.$t % count) == 0) {
+        $(".pager").append("<li><a onclick='loadPets(" + (newOffset - count) + ");'>Prev " + count + "</a></li>");
+        $(".pager").append("<li><a onclick='loadPets(" + data.petfinder.lastOffset.$t + ");'>Next " + count + "</a></li>");
+      } else if (Number(data.petfinder.lastOffset.$t) > Number(count)) {
+        offsetRemainder = data.petfinder.lastOffset.$t % count;
+        prevOffset = data.petfinder.lastOffset.$t - offsetRemainder - count;
+        $(".pager").append("<li><a onclick='loadPets(" + prevOffset + ")'>Prev</a></li>");
+      }
+      var dogs = false;
+      // No parsing necessary.
+      pet_list = data.petfinder.pets.pet;
+      for (i = 0; i < pet_list.length; i++) {
+        if (pet_list[i].animal.$t != "Dog") { break; }
+        dogs = true;
+        var name = pet_list[i].name.$t == null ? '' : pet_list[i].name.$t;
+        var age = pet_list[i].age.$t   == null ? '' : pet_list[i].age.$t;
+        var gender = pet_list[i].sex.$t   == null ? '' : pet_list[i].sex.$t;
+        var breed = "";
+        if (pet_list[i].breeds.breed.length == null) {
+          breed += pet_list[i].breeds.breed.$t + "<br/>";
+        } else {
+          $.each(pet_list[i].breeds.breed, function(t, val) {
+            breed += val.$t + "<br/>";
+          });
+        }
+        var image = "";
+        if ($.isEmptyObject(pet_list[i].media.photos) == false){
+          image += pet_list[i].media.photos.photo[3].$t;
+        }
+        var options = "";
+        if ($.isEmptyObject(pet_list[i].options) == false){
+          if (pet_list[i].options.option.length == null) {
+            options += pet_list[i].options.option.$t + "<br/>";
+          } else {
+            for (t = 0; t < pet_list[i].options.option.length; t++) {
+              if (pet_list[i].options.option[t].$t != "altered") {
+                options += pet_list[i].options.option[t].$t + "<br/>";
+              }
+            }
+          }
+        }
+        var dogId = pet_list[i].id.$t;
+        tr = $('<tr onclick=\'window.open("'+ window.location.origin + '/dogs/?dog_id=' + dogId +'","_self")\'/>');
+        tr.append("<td style='text-align:center;'><img style='padding:1em;height:200px;' src='" + image + "'/></td>");
+        tr.append("<td>" + name + "</td>");
+        tr.append("<td>" + age + "</td>");
+        tr.append("<td>" + gender + "</td>");
+        tr.append("<td>" + breed + "</td>");
+        tr.append("<td>" + options + "</td>");
+        $('table').append(tr);
+      }
+      if (dogs == false) {
+        var noDogs = "<div class='jumbotron'><h2>This shelter doesn't have any dogs!</h2></div>";
+        $('body').append(noDogs);
+      }
+    }
+  });
+}
+window.onload = function() {
+  loadPets();
+}
+</script>
