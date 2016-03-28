@@ -33,7 +33,8 @@ var count = "100";
 var callback = "&callback=?";
 var urlStart = "http://api.petfinder.com/shelter.find?format=json&key=<%= Application.get_env(:sponsor_dot_dog, :petfinder_key) %>&location=<%= @state.state_abbreviation %>&count=";
 
-function loadShelters(newOffset = 0) {
+function loadShelters(newOffset) {
+  var newOffset = (typeof newOffset === 'undefined') ? 0 : newOffset;
   var offset = "&offset=" + newOffset;
   var url = urlStart + count + offset + callback;
   $.ajax(url, {
