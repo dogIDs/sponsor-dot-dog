@@ -23,6 +23,7 @@
       <th>Name</th>
       <th>Address</th>
       <th>City</th>
+      <th>Contact</th>
     </tr>
   </thead>
 </table>
@@ -67,6 +68,7 @@ function loadShelters(newOffset) {
         tr.append("<td>" + name + "</td>");
         tr.append("<td>" + address1 + '<br/>' + address2 + "</td>");
         tr.append("<td>" + city + '<br/>' + state + ' ' + zip + "</td>");
+        tr.append("<td>" + phone + '<br/>' + email + "</td>");
         tr.append("<td>" + '<a class="btn btn-primary" href="' + window.location.origin + '/pet_rescues/?shelter=' + shelter_list[i].id.$t + '">See animals</a>' + "</td>");
         $('table').append(tr);
       }
